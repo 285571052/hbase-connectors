@@ -1,0 +1,18 @@
+sudo: false
+language: java
+os:
+- linux
+script:
+- mvn clean install
+deploy:
+  provider: releases
+  api_key:
+    secure: ADFhiC2k62zXiWbnYccVNg2tLkEobYW84B/DuSBZkVHFd6uHjDSUTQo6/DKDLu4Cb5taqz25koS8N2ht70PsNLaj4MNV+8lWb+KvVVZXgSwOsg1/Zhr1fqtt8Swd8pIlK4IEiL9tC/2gMgDtqXwD0w0OPHxxK0N0ntuNQ7KBovxxbBmVcYjKOYZyv0+bhzuSahSmf3O2f3GSqOUKUKfg4UXcpdIOudA551RObV032AFsXqYPcbabZIi9sgmwR8anRU/fb3UPhkZTj2ko8XsCBtZv3f0Shuu8ZVKVcTkIrTppNiCxr3wW4Uz+ZpPdGpscrfeHPQMcq0WzkYNf4IeXViU3UmYEN8Rwc2AGwF8M7rcxKl1j6QnkEE+4uLWPUkN5chxdTbIlfbe3d/KSVP1F2KZ/jY/PDGaF2imBq4vgmysUyPJnymjOP+jpyzI4IO0BHLeDQxL8F9ebDOI9fpnT5Qceg497gjXFhWDQfDe4YnMludz/EhGWvnCtLto/FSGotl+gV2Od0a+hs0VpkZ/trmnTfaHxIfXZX8Hw8qsO4RLdrnVUqRnpTp4dER6L1iqltGc7LqEMu3aDcpko/TgYygm+1qA+alZffB9gGoxmhCnWeoRwCdOh8Ri3mCY/kJUqRVVb2G02WPXgNBxFBnYwn66y21rNW8Ly5S+oBuDAIA4=
+  file:
+  - /home/travis/build/285571052/hbase-connectors/spark/hbase-spark/target/hbase-spark-1.0.0-SNAPSHOT.jar
+  - /home/travis/build/285571052/hbase-connectors/spark/hbase-spark-it/target/hbase-spark-it-1.0.0-SNAPSHOT.jar
+  skip_cleanup: true
+  file_glob: true
+  on:
+    repo: 285571052/hbase-connectors
+    tags: true
