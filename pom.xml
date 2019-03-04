@@ -60,11 +60,6 @@
     <system>JIRA</system>
     <url>http://issues.apache.org/jira/browse/HBASE</url>
   </issueManagement>
-  <ciManagement>
-    <!--TODO: Fix this. Hook up this module to travisci or some such-->
-    <system>hudson</system>
-    <url>http://hudson.zones.apache.org/hudson/view/HBase/job/HBase-TRUNK/</url>
-  </ciManagement>
   <!--Currently mail sent by this gitbox project goes to issues@hbase.
        git comments are reflected in referenced JIRA issue.
        https://issues.apache.org/jira/browse/INFRA-16887
@@ -75,7 +70,7 @@
       <subscribe>user-subscribe@hbase.apache.org</subscribe>
       <unsubscribe>user-unsubscribe@hbase.apache.org</unsubscribe>
       <post>user@hbase.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/hbase-user/</archive>
+      <archive>https://lists.apache.org/list.html?user@hbase.apache.org</archive>
       <otherArchives>
         <otherArchive>http://dir.gmane.org/gmane.comp.java.hadoop.hbase.user</otherArchive>
         <otherArchive>http://search-hadoop.com/?q=&amp;fc_project=HBase</otherArchive>
@@ -86,7 +81,7 @@
       <subscribe>dev-subscribe@hbase.apache.org</subscribe>
       <unsubscribe>dev-unsubscribe@hbase.apache.org</unsubscribe>
       <post>dev@hbase.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/hbase-dev/</archive>
+      <archive>https://lists.apache.org/list.html?dev@hbase.apache.org</archive>
       <otherArchives>
         <otherArchive>http://dir.gmane.org/gmane.comp.java.hadoop.hbase.devel</otherArchive>
         <otherArchive>http://search-hadoop.com/?q=&amp;fc_project=HBase</otherArchive>
@@ -96,19 +91,19 @@
       <name>Commits List</name>
       <subscribe>commits-subscribe@hbase.apache.org</subscribe>
       <unsubscribe>commits-unsubscribe@hbase.apache.org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/hbase-commits/</archive>
+      <archive>https://lists.apache.org/list.html?commits@hbase.apache.org</archive>
     </mailingList>
     <mailingList>
       <name>Issues List</name>
       <subscribe>issues-subscribe@hbase.apache.org</subscribe>
       <unsubscribe>issues-unsubscribe@hbase.apache.org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/hbase-issues/</archive>
+      <archive>https://lists.apache.org/list.html?issues@hbase.apache.org</archive>
     </mailingList>
     <mailingList>
       <name>Builds List</name>
       <subscribe>builds-subscribe@hbase.apache.org</subscribe>
       <unsubscribe>builds-unsubscribe@hbase.apache.org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/hbase-builds/</archive>
+      <archive>https://lists.apache.org/list.html?builds@hbase.apache.org</archive>
     </mailingList>
   </mailingLists>
   <developers/>
@@ -133,6 +128,7 @@
     <slf4j.version>1.7.25</slf4j.version>
     <checkstyle.version>8.11</checkstyle.version>
     <maven.checkstyle.version>3.0.0</maven.checkstyle.version>
+    <surefire.version>3.0.0-M3</surefire.version>
     <!--Internally we use a different version of protobuf. See hbase-protocol-shaded-->
     <external.protobuf.version>2.5.0</external.protobuf.version>
     <protobuf.plugin.version>0.5.0</protobuf.plugin.version>
@@ -144,6 +140,7 @@
     <netty.hadoop.version>3.6.2.Final</netty.hadoop.version>
     <os.maven.version>1.6.1</os.maven.version>
     <compat.module>hbase-hadoop2-compat</compat.module>
+    <dependency.locations.enabled>false</dependency.locations.enabled>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -295,31 +292,6 @@
     </extensions>
     <pluginManagement>
       <plugins>
-        <!-- See https://maven.apache.org/maven-ci-friendly.html-->
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>flatten-maven-plugin</artifactId>
-          <version>1.0.1</version>
-          <configuration>
-            <updatePomFile>true</updatePomFile>
-          </configuration>
-          <executions>
-            <execution>
-              <id>flatten</id>
-              <phase>process-resources</phase>
-              <goals>
-                <goal>flatten</goal>
-              </goals>
-            </execution>
-            <execution>
-              <id>flatten.clean</id>
-              <phase>clean</phase>
-              <goals>
-                <goal>clean</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
         <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
           <configuration>
@@ -377,6 +349,8 @@
               <exclude>**/.settings/**</exclude>
               <exclude>**/patchprocess/**</exclude>
               <exclude>README.md</exclude>
+              <exclude>**/.flattened-pom.xml</exclude>
+              <exclude>**/src/main/resources/META-INF/LEGAL</exclude>
             </excludes>
           </configuration>
         </plugin>
@@ -408,7 +382,7 @@
             <dependency>
               <groupId>org.apache.hbase</groupId>
               <artifactId>hbase-checkstyle</artifactId>
-              <version>${project.version}</version>
+              <version>${hbase.version}</version>
             </dependency>
             <dependency>
               <groupId>com.puppycrawl.tools</groupId>
@@ -503,6 +477,32 @@
                 </bannedDependencies>
               </rules>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- See https://maven.apache.org/maven-ci-friendly.html-->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <version>1.1.0</version>
+        <configuration>
+          <updatePomFile>true</updatePomFile>
+          <flattenMode>resolveCiFriendliesOnly</flattenMode>
+        </configuration>
+        <executions>
+          <execution>
+            <id>flatten</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>flatten.clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
